@@ -1,0 +1,137 @@
+def tampil():
+    while True:
+        try:
+            pilihan = int(input('Masukkan Pilihan Matkul (1-9): '))
+            if pilihan < 1 or pilihan > 9:
+                print("Pilihan harus antara 1 sampai 9. Silakan coba lagi.")
+                continue
+            nilai = int(input('Masukkan nilai Anda (0-100): '))
+            if nilai < 0 or nilai > 100:
+                print("Nilai harus antara 0 sampai 100. Silakan coba lagi.")
+                continue
+            return pilihan, nilai
+        except ValueError:
+            print("Input tidak valid. Harap masukkan angka.")
+
+def menu_matkul():
+    print('\n=== Daftar Mata Kuliah ===')
+    print('1. Analisis Data Eksploratif (2 sks)')
+    print('2. Big Data & Data Analytics (3 sks)')
+    print('3. Data Mining (3 sks)')
+    print('4. Feature Engineering (3 sks)')
+    print('5. Jaringan Syaraf Tiruan (2 sks)')
+    print('6. Kewarganegaraan (2 sks)')
+    print('7. Manajemen dan Infrastruktur Data (3 sks)')
+    print('8. Statistika Inferensial Lanjut (2 sks)')
+    print('9. Statistika Inferensial Lanjut Praktik (2 sks)')
+
+def get_sks(pilihan):
+    sks_dict = {
+        1: 2,
+        2: 3,
+        3: 3,
+        4: 3,
+        5: 2,
+        6: 2,
+        7: 3,
+        8: 2,
+        9: 2
+    }
+    return sks_dict.get(pilihan, 0)
+
+def get_nama_matkul(pilihan):
+    matkul_dict = {
+        1: "Analisis Data Eksploratif",
+        2: "Big Data & Data Analytics",
+        3: "Data Mining",
+        4: "Feature Engineering",
+        5: "Jaringan Syaraf Tiruan",
+        6: "Kewarganegaraan",
+        7: "Manajemen dan Infrastruktur Data",
+        8: "Statistika Inferensial Lanjut",
+        9: "Statistika Inferensial Lanjut Praktik"
+    }
+    return matkul_dict.get(pilihan, "Tidak Diketahui")
+
+def konversi_nilai(nilai):
+    if nilai >= 81:
+        return 'A', 4
+    elif nilai >= 61:
+        return 'B', 3
+    elif nilai >= 41:
+        return 'C', 2
+    elif nilai >= 21:
+        return 'D', 1
+    else:
+        return 'E', 0
+
+def tampilkan_khs(khs):
+    print("\n=== Kartu Hasil Studi (KHS) ===")
+    print("{:<5} {:<35} {:<5} {:<10} {:<10} {:<10}".format(
+        "No.", "Mata Kuliah", "SKS", "Nilai Angka", "Nilai Huruf", "Nilai Skala"))
+    print("-" * 75)
+    for idx, item in enumerate(khs, start=1):
+        print("{:<5} {:<35} {:<5} {:<10} {:<10} {:<10}".format(
+            idx, item['nama_matkul'], item['sks'], item['nilai_angka'], item['nilai_huruf'], item['nilai_skala']))
+
+def main():
+    total_sks = 0
+    total_nilai = 0
+    khs = []  # Untuk menyimpan data Kartu Hasil Studi
+
+    while total_sks < 22:
+        menu_matkul()
+        print(f"\nTotal SKS Saat Ini: {total_sks}/22")
+        pilihan, nilai_angka = tampil()
+        sks_matkul = get_sks(pilihan)
+        nama_matkul = get_nama_matkul(pilihan)
+        nilai_huruf, nilai_skala = konversi_nilai(nilai_angka)
+
+        # Cek apakah mata kuliah sudah diambil sebelumnya
+        if any(item['matkul'] == pilihan for item in khs):
+            print("Mata kuliah ini sudah diambil. Silakan pilih mata kuliah lain.")
+            continue
+
+        # Menambahkan data ke KHS
+        khs.append({
+            'matkul': pilihan,
+            'nama_matkul': nama_matkul,
+            'sks': sks_matkul,
+            'nilai_angka': nilai_angka,
+            'nilai_huruf': nilai_huruf,
+            'nilai_skala': nilai_skala
+        })
+
+        total_sks += sks_matkul
+        total_nilai += nilai_skala * sks_matkul
+
+        print(f"\nMata Kuliah {nama_matkul} ({sks_matkul} SKS) berhasil ditambahkan.")
+        print(f"Total SKS: {total_sks}")
+        print(f"Total Nilai: {total_nilai}")
+        print(f"IPK Sementara: {total_nilai / total_sks:.2f}")
+
+        # Tampilkan KHS sementara
+        tampilkan_khs(khs)
+
+        # Opsi untuk menghapus mata kuliah terakhir
+        if total_sks < 22:
+            hapus = input("Apakah Anda ingin menghapus mata kuliah terakhir? (y/n): ").lower()
+            if hapus == 'y':
+                item_dihapus = khs.pop()
+                total_sks -= item_dihapus['sks']
+                total_nilai -= item_dihapus['nilai_skala'] * item_dihapus['sks']
+                print(f"Mata Kuliah {item_dihapus['nama_matkul']} telah dihapus.")
+                print(f"Total SKS: {total_sks}")
+                print(f"Total Nilai: {total_nilai}")
+                print(f"IPK Sementara: {total_nilai / total_sks:.2f}")
+
+    if total_sks == 22:
+        print("\n=== Selamat, Anda telah memilih semua mata kuliah dengan total SKS 22. ===")
+        tampilkan_khs(khs)
+        print("\n=== Ringkasan ===")
+        print(f"Total SKS: {total_sks}")
+        print(f"Total Nilai: {total_nilai}")
+        print(f"IPK: {total_nilai / total_sks:.2f}")
+
+if __name__ == "__main__":
+    main()
